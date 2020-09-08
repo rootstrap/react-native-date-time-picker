@@ -125,8 +125,6 @@ class DatePicker extends Component {
     if (mode == "time" && is24Hour && !pFormat)
       format = DEFAULT_FORMATS["time24"];
 
-    console.log("pFormat: ", pFormat, " format: ", format);
-
     if (!date) {
       let now = new Date();
       if (minDate) {
@@ -160,8 +158,6 @@ class DatePicker extends Component {
     let format = pFormat || DEFAULT_FORMATS[mode];
     if (mode == "time" && is24Hour && !pFormat)
       format = DEFAULT_FORMATS["time24"];
-
-    console.log("pFormat: ", pFormat, " format: ", format);
 
     const dateInstance = date instanceof Date ? date : this.getDate(date);
 
@@ -527,7 +523,7 @@ DatePicker.defaultProps = {
 
   cancelColor: "red",
   okColor: "green",
-  accentColor: "blue",
+  accentColor: "purple",
 };
 
 DatePicker.propTypes = {
