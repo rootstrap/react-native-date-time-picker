@@ -11,23 +11,23 @@ import {
   Platform,
   Text,
   TouchableHighlight,
-  View
+  View,
 } from "react-native";
 import styles from "./styles";
 var RCTDateTimePicker = NativeModules.DateTimePicker;
 
-const FORMATS = {
+const DEFAULT_FORMATS = {
   date: "YYYY-MM-DD",
   datetime: "YYYY-MM-DD HH:mm",
   time24: "HH:mm",
-  time: "hh:mm a"
+  time: "hh:mm a",
 };
 const SUPPORTED_ORIENTATIONS = [
   "portrait",
   "portrait-upside-down",
   "landscape",
   "landscape-left",
-  "landscape-right"
+  "landscape-right",
 ];
 
 class DatePicker extends Component {
@@ -38,7 +38,7 @@ class DatePicker extends Component {
       date: this.getDate(),
       modalVisible: false,
       animatedHeight: new Animated.Value(0),
-      allowPointerEvents: true
+      allowPointerEvents: true,
     };
     this._hideDateTimePicker = this._hideDateTimePicker.bind(this);
     this._handleDatePicked = this._handleDatePicked.bind(this);
@@ -68,12 +68,12 @@ class DatePicker extends Component {
       this.setState({ modalVisible: visible });
       return Animated.timing(this.state.animatedHeight, {
         toValue: height,
-        duration: duration
+        duration: duration,
       }).start();
     } else {
       return Animated.timing(this.state.animatedHeight, {
         toValue: 0,
-        duration: duration
+        duration: duration,
       }).start(() => {
         this.setState({ modalVisible: visible });
       });
@@ -120,9 +120,10 @@ class DatePicker extends Component {
   }
 
   getDate(date = this.props.date) {
-    const { mode, minDate, maxDate, is24Hour } = this.props;
-    let format = FORMATS[mode];
-    if (mode == "time" && is24Hour) format = FORMATS["time24"];
+    const { format: pFormat, mode, minDate, maxDate, is24Hour } = this.props;
+    let format = pFormat || DEFAULT_FORMATS[mode];
+    if (mode == "time" && is24Hour && !pFormat)
+      format = DEFAULT_FORMATS["time24"];
 
     if (!date) {
       let now = new Date();
@@ -153,9 +154,10 @@ class DatePicker extends Component {
   }
 
   getDateStr(date = this.props.date) {
-    const { mode, is24Hour } = this.props;
-    let format = FORMATS[mode];
-    if (mode == "time" && is24Hour) format = FORMATS["time24"];
+    const { format: pFormat, mode, is24Hour } = this.props;
+    let format = pFormat || DEFAULT_FORMATS[mode];
+    if (mode == "time" && is24Hour && !pFormat)
+      format = DEFAULT_FORMATS["time24"];
 
     const dateInstance = date instanceof Date ? date : this.getDate(date);
 
@@ -211,14 +213,14 @@ class DatePicker extends Component {
       if (options.minTime) {
         options = {
           ...options,
-          minTime: moment(options.minTime).format("HH:mm:ss")
+          minTime: moment(options.minTime).format("HH:mm:ss"),
         };
       }
 
       if (options.maxTime) {
         options = {
           ...options,
-          maxTime: moment(options.maxTime).format("HH:mm:ss")
+          maxTime: moment(options.maxTime).format("HH:mm:ss"),
         };
       }
     } else {
@@ -229,20 +231,24 @@ class DatePicker extends Component {
       if (options.minDate) {
         options = {
           ...options,
-          minDate: moment(options.minDate).format("DD-MM-YYYY")
+          minDate: moment(options.minDate).format("DD-MM-YYYY"),
         };
       }
 
       if (options.maxDate) {
         options = {
           ...options,
-          maxDate: moment(options.maxDate).format("DD-MM-YYYY")
+          maxDate: moment(options.maxDate).format("DD-MM-YYYY"),
         };
       }
     }
     // console.log({ options });
     if (options.mode == "time")
-      RCTDateTimePicker.showTimePicker(options, function(hour, minute, second) {
+      RCTDateTimePicker.showTimePicker(options, function (
+        hour,
+        minute,
+        second
+      ) {
         //ƒconsole.log({ hour, minute, second });
         let newDate = new Date();
         newDate.setHours(hour);
@@ -253,7 +259,7 @@ class DatePicker extends Component {
         else _this._handleDatePicked(null);
       });
     else
-      RCTDateTimePicker.showTimePicker(options, function(year, month, day) {
+      RCTDateTimePicker.showTimePicker(options, function (year, month, day) {
         // console.log({ year, month, day });
         let newDate = new Date(year, month - 1, day);
         //  console.log({ newDate });
@@ -262,13 +268,13 @@ class DatePicker extends Component {
       });
   }
 
-  _handleDatePicked = date => {
+  _handleDatePicked = (date) => {
     let { onConfirm, onCancel } = this.props;
     if (date) {
       let displayedDate = this.getDate(date);
       this.setState({
         originalDate: date,
-        date: displayedDate
+        date: displayedDate,
       });
       onConfirm && onConfirm(date);
     } else {
@@ -281,11 +287,11 @@ class DatePicker extends Component {
   onDateChange(date) {
     this.setState({
       allowPointerEvents: false,
-      date: date
+      date: date,
     });
     const timeoutId = setTimeout(() => {
       this.setState({
-        allowPointerEvents: true
+        allowPointerEvents: true,
       });
       clearTimeout(timeoutId);
     }, 200);
@@ -300,7 +306,7 @@ class DatePicker extends Component {
 
     // reset state
     this.setState({
-      date: this.getDate()
+      date: this.getDate(),
     });
 
     if (Platform.OS == "ios") {
@@ -337,14 +343,14 @@ class DatePicker extends Component {
       confirmBtnTestID,
       allowFontScaling,
       locale,
-      darkTheme
+      darkTheme,
     } = this.props;
 
     const dateInputStyle = [
       styles.dateInput,
       customStyles.dateInput,
       disabled && styles.disabled,
-      disabled && customStyles.disabled
+      disabled && customStyles.disabled,
     ];
 
     return (
@@ -385,13 +391,13 @@ class DatePicker extends Component {
                       styles.datePickerCon,
                       { height: this.state.animatedHeight },
                       customStyles.datePickerCon,
-                      darkTheme ? { backgroundColor: "lightgrey" } : {}
+                      darkTheme ? { backgroundColor: "lightgrey" } : {},
                     ]}
                   >
                     <View
                       style={[
                         styles.btnsView,
-                        accentColor ? { backgroundColor: accentColor } : {}
+                        accentColor ? { backgroundColor: accentColor } : {},
                       ]}
                     >
                       <TouchableComponent
@@ -400,7 +406,7 @@ class DatePicker extends Component {
                         style={[
                           // styles.btnText,
                           styles.btnCancel,
-                          customStyles.btnCancel
+                          customStyles.btnCancel,
                         ]}
                         testID={cancelBtnTestID}
                       >
@@ -410,7 +416,7 @@ class DatePicker extends Component {
                             styles.btnTextText,
                             styles.btnTextCancel,
                             customStyles.btnTextCancel,
-                            cancelColor ? { color: cancelColor } : {}
+                            cancelColor ? { color: cancelColor } : {},
                           ]}
                         >
                           {cancelText}
@@ -429,7 +435,7 @@ class DatePicker extends Component {
                         style={[
                           // styles.btnText,
                           styles.btnConfirm,
-                          customStyles.btnConfirm
+                          customStyles.btnConfirm,
                         ]}
                         testID={confirmBtnTestID}
                       >
@@ -438,7 +444,7 @@ class DatePicker extends Component {
                           style={[
                             styles.btnTextText,
                             customStyles.btnTextConfirm,
-                            okColor ? { color: okColor } : {}
+                            okColor ? { color: okColor } : {},
                           ]}
                         >
                           {okText}
@@ -451,13 +457,13 @@ class DatePicker extends Component {
                       }
                       style={[
                         styles.datePicker,
-                        darkTheme ? { backgroundColor: "lightgrey" } : {}
+                        darkTheme ? { backgroundColor: "lightgrey" } : {},
                       ]}
                     >
                       <DatePickerIOS
                         date={this.state.date}
                         mode={mode}
-                        ref={picker => {
+                        ref={(picker) => {
                           this._picker = picker;
                         }}
                         minimumDate={minDate && this.getDate(minDate)}
@@ -517,7 +523,7 @@ DatePicker.defaultProps = {
 
   cancelColor: "red",
   okColor: "green",
-  accentColor: "blue"
+  accentColor: "blue",
 };
 
 DatePicker.propTypes = {
@@ -525,7 +531,7 @@ DatePicker.propTypes = {
   date: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.instanceOf(Date),
-    PropTypes.object
+    PropTypes.object,
   ]),
   minDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]), //ios
   maxDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]), //ios
@@ -547,7 +553,7 @@ DatePicker.propTypes = {
   locale: PropTypes.string, //ios
   placeholder: PropTypes.string,
   title: PropTypes.string,
-  format: PropTypes.string,
+  format: PropTypes.string, // all
   okText: PropTypes.string,
   cancelText: PropTypes.string,
   okColor: PropTypes.string,
@@ -572,7 +578,7 @@ DatePicker.propTypes = {
   showYearPickerFirst: PropTypes.bool, //android date picker
 
   scrollOrientation: PropTypes.oneOf(["vertical", "horizontal"]), //android date picker
-  disabledTimes: PropTypes.array //android time picker
+  disabledTimes: PropTypes.array, //android time picker
 };
 
 export default DatePicker;
