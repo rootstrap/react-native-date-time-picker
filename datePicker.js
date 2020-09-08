@@ -493,7 +493,7 @@ class DatePicker extends Component {
 
 DatePicker.defaultProps = {
   mode: "date",
-  date: new Date(),
+  date: "",
   // component height: 216(DatePickerIOS) + 1(borderTop) + 42(marginTop), IOS only
   height: 259,
 
